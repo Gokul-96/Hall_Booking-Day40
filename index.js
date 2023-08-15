@@ -11,7 +11,7 @@ const express = require("express");
 const app = express();
 
 // PORT
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3005;
 
 // Middleware...
 app.use(express.json());
@@ -81,8 +81,8 @@ app.post("/Book-Room", async (req, res) => {
       // -----------------------
       //Do Operations
       //Finding the customer requested room.
-      const Get_Rooms = await Rooms_Collection.findOne({
-        room_id: req.body.room_id,
+      const Get_Rooms = await Rooms_Collection.findOne({ //  get from room collection and with given body id find one means filter one 
+        room_id: req.body.room_id,  // want to find a document where the value of the room_id field matches the value of req.body.room_id
       });
       // -----------------------
       // Find the Booking Details ...
@@ -134,15 +134,16 @@ app.get("/Rooms-BookedData", async (req, res) => {
       const connection = await mongoclient.connect(MONGODB_URL);
       // -----------------------
       //? Select Database
-      const db = connection.db("HALL_BOOKING_APP");
+      const db = connection.db("HallBookingnodejs");
       // -----------------------
       //? Select Collection
       const collection = db.collection("BOOKING_DETAILS");
+   
       // -----------------------
       //? Do Operation
       const Room_Details = await collection
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
+        .find({}, { projection: { _id: 0 } })  //id field exclude //find{} retrieve all the document in query without any filter so using {} empty
+        .toArray(); // convert to array
       // -----------------------
       //? Finally Close the Connection
       connection.close();
@@ -150,7 +151,7 @@ app.get("/Rooms-BookedData", async (req, res) => {
       // -----------------------
     } catch (error) {
       console.log(error);
-      res.status(500).json({ messagae: "Something Went Wrong" });
+      res.status(500).json({ message: "Something Went Wrong" });
     }
   });
   
@@ -163,14 +164,14 @@ app.get("/Rooms-BookedData", async (req, res) => {
       const connection = await mongoclient.connect(MONGODB_URL);
       // -----------------------
       //? Select Database
-      const db = connection.db("HALL_BOOKING_APP");
+      const db = connection.db("HallBookingnodejs");
       // -----------------------
       //? Select Collection
       const collection = db.collection("BOOKING_DETAILS");
       // -----------------------
       //? Do Operation
       const Customer_Details = await collection
-        .find({}, { projection: { _id: 0, room_id: 0, booked_status: 0 } })
+        .find({}, { projection: { _id: 0, room_id: 0, booked_status: 0} })
         .toArray();
       // -----------------------
       //? Finally Close the Connection
@@ -179,7 +180,7 @@ app.get("/Rooms-BookedData", async (req, res) => {
       // -----------------------
     } catch (error) {
       console.log(error);
-      res.status(500).json({ messagae: "Something Went Wrong" });
+      res.status(500).json({ message: "Something Went Wrong" });
     }
   });
   
@@ -192,7 +193,7 @@ app.get("/Rooms-BookedData", async (req, res) => {
       const connection = await mongoclient.connect(MONGODB_URL);
       // -----------------------
       //? Select Database
-      const db = connection.db("HALL_BOOKING_APP");
+      const db = connection.db("HallBookingnodejs");
       // -----------------------
       //? Select Collection
       const collection = db.collection("BOOKING_DETAILS");
@@ -204,7 +205,7 @@ app.get("/Rooms-BookedData", async (req, res) => {
             $group: {
               _id: {
                 customer_name: "$customer_name",
-                room_id: "$room_id",
+                room_id: "$room_id"
               },
               bookings: {
                 $push: {
@@ -212,7 +213,7 @@ app.get("/Rooms-BookedData", async (req, res) => {
                   start_time: "$start_time",
                   end_time: "$end_time",
                   room_name: "$room_name",
-                  booked_status: "$booked_status",
+                  booked_status: "$booked_status"
                 },
               },
               count: { $sum: 1 },
@@ -224,9 +225,9 @@ app.get("/Rooms-BookedData", async (req, res) => {
               room_id: "$_id.room_id",
               bookings: 1,
               count: 1,
-              _id: 0,
+              _id: 0
             },
-          },
+          }
         ])
         .toArray();
       // -----------------------
